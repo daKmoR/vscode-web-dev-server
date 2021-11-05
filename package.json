@@ -10,11 +10,21 @@
     "Other"
   ],
   "activationEvents": [
+    "onView:webDevServer.previewView",
     "onCommand:helloworld.helloWorld",
     "onCommand:helloworld.start"
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "views": {
+      "explorer": [
+        {
+					"type": "webview",
+					"id": "webDevServer.previewView",
+					"name": "Web Dev Server"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "helloworld.helloWorld",

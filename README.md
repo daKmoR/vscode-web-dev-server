@@ -1,5 +1,14 @@
 # helloworld README
 
+Requires putting
+
+```
+"workbench.experimental.sidePanel.enabled": true,
+```
+
+in your `.vscode/settings.json` file.
+
+
 This is the README for your extension "helloworld". After writing up a brief description, we recommend including the following sections.
 
 ## Features

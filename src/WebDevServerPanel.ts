@@ -3,37 +3,57 @@ import * as vscode from "vscode";
 /**
  * Manages cat coding webview panels
  */
-export class WebDevServerPanel {
-  /**
-   * Track the currently panel. Only allow a single panel to exist at a time.
-   */
-  public static currentPanel: WebDevServerPanel | undefined;
+export class PreviewViewProvider implements vscode.WebviewViewProvider {
+  public static readonly viewType = "webDevServer.previewView";
 
-  public static readonly viewType = "webDevServer";
+  private _view?: vscode.WebviewView;
 
-  private _panel: vscode.WebviewPanel;
-  private _extensionUri: vscode.Uri;
+	constructor(
+		private readonly _extensionUri: vscode.Uri,
+	) { }
 
-  private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
-    this._panel = panel;
-    this._extensionUri = extensionUri;
+	public resolveWebviewView(
+		webviewView: vscode.WebviewView,
+		context: vscode.WebviewViewResolveContext,
+		_token: vscode.CancellationToken,
+	) {
+		this._view = webviewView;
 
-    // Set the webview's initial html content
-    this._update();
-  }
+		webviewView.webview.options = {
+			// Allow scripts in the webview
+			enableScripts: true,
 
-  private async _update() {
-    this._panel.title = "Web Dev Server";
+			localResourceRoots: [
+				this._extensionUri
+			]
+		};
+
+		webviewView.webview.html = this._update(webviewView.webview);
+
+		// webviewView.webview.onDidReceiveMessage(data => {
+		// 	switch (data.type) {
+		// 		case 'colorSelected':
+		// 			{
+		// 				vscode.window.activeTextEditor?.insertSnippet(new vscode.SnippetString(`#${data.value}`));
+		// 				break;
+		// 			}
+		// 	}
+		// });
+	}  
+
+  private _update(webview: vscode.Webview) {
+    // this._panel.title = "Web Dev Server";
     const uri = "http://localhost:3000";
 
     const dynamicWebServerPort = 3000;
-    const fullWebServerUri = await vscode.env.asExternalUri(
-      vscode.Uri.parse(`http://localhost:${dynamicWebServerPort}`)
-    );
+    // const fullWebServerUri = await vscode.env.asExternalUri(
+    //   vscode.Uri.parse(`http://localhost:${dynamicWebServerPort}`)
+    // );
+    const fullWebServerUri = `http://localhost:${dynamicWebServerPort}`;
 
-    const cspSource = this._panel.webview.cspSource;
+    const cspSource = webview.cspSource;
 
-    this._panel.webview.html = `
+    return `
       <!DOCTYPE html>
       <html lang="en">
       <head>
@@ -56,28 +76,28 @@ export class WebDevServerPanel {
     `;
   }
 
-  public static createOrShow(extensionUri: vscode.Uri) {
-    const column = vscode.window.activeTextEditor
-      ? vscode.window.activeTextEditor.viewColumn
-      : undefined;
+  // public static createOrShow(extensionUri: vscode.Uri) {
+  //   const column = vscode.window.activeTextEditor
+  //     ? vscode.window.activeTextEditor.viewColumn
+  //     : undefined;
 
-    // If we already have a panel, show it.
-    if (WebDevServerPanel.currentPanel) {
-      WebDevServerPanel.currentPanel._panel.reveal(column);
-      return;
-    }
+  //   // If we already have a panel, show it.
+  //   if (WebDevServerPanel.currentPanel) {
+  //     WebDevServerPanel.currentPanel._panel.reveal(column);
+  //     return;
+  //   }
 
-    // Otherwise, create a new panel.
-    const panel = vscode.window.createWebviewPanel(
-      WebDevServerPanel.viewType,
-      "Cat Coding",
-      vscode.ViewColumn.Two,
-      {
-        enableScripts: true,
-        retainContextWhenHidden: true,
-      }
-    );
+  //   // Otherwise, create a new panel.
+  //   const panel = vscode.window.createWebviewPanel(
+  //     WebDevServerPanel.viewType,
+  //     "Cat Coding",
+  //     vscode.ViewColumn.Two,
+  //     {
+  //       enableScripts: true,
+  //       retainContextWhenHidden: true,
+  //     }
+  //   );
 
-    WebDevServerPanel.currentPanel = new WebDevServerPanel(panel, extensionUri);
-  }
+  //   WebDevServerPanel.currentPanel = new WebDevServerPanel(panel, extensionUri);
+  // }
 }

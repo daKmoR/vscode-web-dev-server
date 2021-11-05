@@ -3,7 +3,7 @@
 import * as vscode from "vscode";
 
 import { startDevServer } from "@web/dev-server";
-import { WebDevServerPanel } from "./WebDevServerPanel";
+import { PreviewViewProvider } from "./WebDevServerPanel";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -38,15 +38,20 @@ export function activate(context: vscode.ExtensionContext) {
     },
   });
 
-  context.subscriptions.push(
-    vscode.commands.registerCommand("helloworld.start", () => {
+  const provider = new PreviewViewProvider(context.extensionUri);
+
+	context.subscriptions.push(
+		vscode.window.registerWebviewViewProvider(PreviewViewProvider.viewType, provider));
+
+  // context.subscriptions.push(
+  //   vscode.commands.registerCommand("helloworld.start", () => {
 
 
-      WebDevServerPanel.createOrShow(context.extensionUri);
-    })
-  );
+  //     WebDevServerPanel.createOrShow(context.extensionUri);
+  //   })
+  // );
 
-  context.subscriptions.push(disposable);
+  // context.subscriptions.push(disposable);
 }
 
 // this method is called when your extension is deactivated
