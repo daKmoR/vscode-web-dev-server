@@ -1,36 +1,21 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
+import path from "path";
 
 import { startDevServer } from "@web/dev-server";
 import { PreviewViewProvider } from "./WebDevServerPanel";
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
-  // Use the console to output diagnostic information (console.log) and errors (console.error)
-  // This line of code will only be executed once when your extension is activated
-  console.log('Congratulations, your extension "helloworld" is now active!');
-
-  // if (vscode && vscode.workspace) {
-  //   const rootDir = vscode.workspace.workspaceFolders[0].uri.fsPath;
-  // }
-
-  // The command has been defined in the package.json file
-  // Now provide the implementation of the command with registerCommand
-  // The commandId parameter must match the command field in package.json
+export async function activate(context: vscode.ExtensionContext) {
   let disposable = vscode.commands.registerCommand(
     "helloworld.helloWorld",
     () => {
-      // The code you place here will be executed every time your command is executed
-      // Display a message box to the user
-      const rootDir = vscode?.workspace?.workspaceFolders?.[0]?.uri?.fsPath;
-      vscode.window.showInformationMessage(`Howdy2 👋! ${rootDir}`);
+      vscode.window.showInformationMessage(`Howdy2 👋!`);
     }
   );
 
-  const rootDir = vscode?.workspace?.workspaceFolders?.[0]?.uri?.fsPath;
-  startDevServer({
+  const rootDir = vscode?.workspace?.workspaceFolders?.[0]?.uri?.fsPath || "";
+  const devServer = await startDevServer({
     config: {
       rootDir,
       port: 3000,
@@ -38,14 +23,29 @@ export function activate(context: vscode.ExtensionContext) {
     },
   });
 
-  const provider = new PreviewViewProvider(context.extensionUri);
+  const preview = new PreviewViewProvider(context.extensionUri);
 
-	context.subscriptions.push(
-		vscode.window.registerWebviewViewProvider(PreviewViewProvider.viewType, provider));
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider(
+      PreviewViewProvider.viewType,
+      preview
+    )
+  );
+
+  vscode.window.onDidChangeActiveTextEditor((ev) => {
+    const fsPath = ev?.document?.uri?.fsPath || "";
+    if (fsPath.endsWith('.html') && fsPath.startsWith(rootDir)) {
+      const newUrl = path.relative(rootDir, fsPath);
+      vscode.window.showInformationMessage(`changed to 👋! ${newUrl}`);
+      devServer.webSockets.sendImport(
+        `data:text/javascript,window.location.pathname='${newUrl}';`
+      );
+      preview.url = `http://localhost:3000/${newUrl}`;
+    }
+  });
 
   // context.subscriptions.push(
   //   vscode.commands.registerCommand("helloworld.start", () => {
-
 
   //     WebDevServerPanel.createOrShow(context.extensionUri);
   //   })

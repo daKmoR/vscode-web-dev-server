@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { getNonce } from "./getNonce";
 
 /**
  * Manages cat coding webview panels
@@ -7,53 +8,48 @@ export class PreviewViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "webDevServer.previewView";
 
   private _view?: vscode.WebviewView;
+  private _url: string = "http://localhost:3000/";
 
-	constructor(
-		private readonly _extensionUri: vscode.Uri,
-	) { }
+  constructor(private readonly _extensionUri: vscode.Uri) {}
 
-	public resolveWebviewView(
-		webviewView: vscode.WebviewView,
-		context: vscode.WebviewViewResolveContext,
-		_token: vscode.CancellationToken,
-	) {
-		this._view = webviewView;
+  public resolveWebviewView(
+    webviewView: vscode.WebviewView,
+    context: vscode.WebviewViewResolveContext,
+    _token: vscode.CancellationToken
+  ) {
+    this._view = webviewView;
 
-		webviewView.webview.options = {
-			// Allow scripts in the webview
-			enableScripts: true,
+    webviewView.webview.options = {
+      enableScripts: true,
+      localResourceRoots: [this._extensionUri],
+    };
 
-			localResourceRoots: [
-				this._extensionUri
-			]
-		};
+    this._update();
+  }
 
-		webviewView.webview.html = this._update(webviewView.webview);
+  public set url(url: string) {
+    if (!this._view) {
+      return;
+    }
+    this._view.webview.postMessage({ type: "update-url", url });
+  }
 
-		// webviewView.webview.onDidReceiveMessage(data => {
-		// 	switch (data.type) {
-		// 		case 'colorSelected':
-		// 			{
-		// 				vscode.window.activeTextEditor?.insertSnippet(new vscode.SnippetString(`#${data.value}`));
-		// 				break;
-		// 			}
-		// 	}
-		// });
-	}  
+  private async _update() {
+    if (!this._view) {
+      return;
+    }
+    const fullWebServerUri = await vscode.env.asExternalUri(
+      vscode.Uri.parse(this._url)
+    );
+    // const fullWebServerUri = `http://localhost:${dynamicWebServerPort}`;
 
-  private _update(webview: vscode.Webview) {
-    // this._panel.title = "Web Dev Server";
-    const uri = "http://localhost:3000";
+    const cspSource = this._view.webview.cspSource;
+    const scriptUri = this._view.webview.asWebviewUri(
+      vscode.Uri.joinPath(this._extensionUri, "media", "main.js")
+    );
+    const nonce = getNonce();
 
-    const dynamicWebServerPort = 3000;
-    // const fullWebServerUri = await vscode.env.asExternalUri(
-    //   vscode.Uri.parse(`http://localhost:${dynamicWebServerPort}`)
-    // );
-    const fullWebServerUri = `http://localhost:${dynamicWebServerPort}`;
-
-    const cspSource = webview.cspSource;
-
-    return `
+    this._view.webview.html = `
       <!DOCTYPE html>
       <html lang="en">
       <head>
@@ -61,16 +57,23 @@ export class PreviewViewProvider implements vscode.WebviewViewProvider {
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <meta http-equiv="X-UA-Compatible" content="ie=edge">
           <title>Preview</title>
-          <style>iframe { position: absolute; right: 0; bottom: 0; left: 0; top: 200px; border: 0; background-color: white } </style>
+          <style>
+            iframe { position: absolute; right: 0; bottom: 0; left: 0; top: 38px; border: 0; background-color: white; }
+            div { text-align: center; position: absolute; right: 0; bottom: 0; left: 0; top: 0; }
+            input { border-radius: 10px; border: 1px solid #333; padding: 4px 10px; width: calc(100vw - 50px); background: #333; color: #ddd; margin: 5px 0; }
+          </style>
           <meta
             http-equiv="Content-Security-Policy"
-            content="default-src 'none'; frame-src ${fullWebServerUri} ${cspSource} https:; img-src ${cspSource} https:; script-src ${cspSource}; style-src ${cspSource};"
+            content="default-src 'none'; frame-src ${fullWebServerUri} ${cspSource} https:; img-src ${cspSource} https:; script-src ${cspSource} 'nonce-${nonce}'; style-src ${cspSource};"
           />
+          
       </head>
       <body>
-      <p>${fullWebServerUri}</p>
-      <p>${cspSource}</p>
-        <iframe src="${fullWebServerUri}" frameBorder="0" width="100%" height="100%" />
+        <div>
+          <input type="text" readonly value="${this._url}" />
+        </div>
+        <script nonce="${nonce}" src="${scriptUri}"></script>
+        <iframe src="${fullWebServerUri}" frameBorder="0" width="100%" height="100%" />        
       </body>
       </html>
     `;
