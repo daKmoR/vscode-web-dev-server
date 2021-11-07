@@ -10,7 +10,9 @@ export class PreviewViewProvider implements vscode.WebviewViewProvider {
   private _view?: vscode.WebviewView;
   private _url: string = "http://localhost:3000/";
 
-  constructor(private readonly _extensionUri: vscode.Uri) {}
+  constructor(private readonly _extensionUri: vscode.Uri, url: string) {
+    this._url = url;
+  }
 
   public resolveWebviewView(
     webviewView: vscode.WebviewView,

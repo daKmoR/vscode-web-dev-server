@@ -7,23 +7,24 @@ import { startDevServer } from "@web/dev-server";
 import { PreviewViewProvider } from "./WebDevServerPanel";
 
 export async function activate(context: vscode.ExtensionContext) {
-  let disposable = vscode.commands.registerCommand(
-    "helloworld.helloWorld",
-    () => {
-      vscode.window.showInformationMessage(`Howdy2 👋!`);
-    }
-  );
-
   const rootDir = vscode?.workspace?.workspaceFolders?.[0]?.uri?.fsPath || "";
+
+  if (!rootDir) {
+    vscode.window.showErrorMessage(`VS Code Web Dev Server only works with a single workspace`);
+  }
+
+  const workspaceRoot = path.resolve(rootDir);
+
   const devServer = await startDevServer({
     config: {
       rootDir,
-      port: 3000,
       watch: true,
     },
+    // argv: ['', '', '--config', workspaceRoot]
   });
 
-  const preview = new PreviewViewProvider(context.extensionUri);
+  const url = `http://localhost:${devServer.config.port}/`;
+  const preview = new PreviewViewProvider(context.extensionUri, url);
 
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
@@ -35,14 +36,21 @@ export async function activate(context: vscode.ExtensionContext) {
   vscode.window.onDidChangeActiveTextEditor((ev) => {
     const fsPath = ev?.document?.uri?.fsPath || "";
     if (fsPath.endsWith('.html') && fsPath.startsWith(rootDir)) {
-      const newUrl = path.relative(rootDir, fsPath);
-      vscode.window.showInformationMessage(`changed to 👋! ${newUrl}`);
+      const newPathname = path.relative(rootDir, fsPath);
+      // vscode.window.showInformationMessage(`changed to 👋! ${newPathname}`);
       devServer.webSockets.sendImport(
-        `data:text/javascript,window.location.pathname='${newUrl}';`
+        `data:text/javascript,window.location.pathname='${newPathname}';`
       );
-      preview.url = `http://localhost:3000/${newUrl}`;
+      preview.url = `${url}/${newPathname}`;
     }
   });
+
+  let disposable = vscode.commands.registerCommand(
+    "helloworld.helloWorld",
+    () => {
+      vscode.window.showInformationMessage(`Howdy2 👋! ${devServer.config.port}`);
+    }
+  );
 
   // context.subscriptions.push(
   //   vscode.commands.registerCommand("helloworld.start", () => {
