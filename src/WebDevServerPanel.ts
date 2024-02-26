@@ -32,8 +32,7 @@ export class PreviewViewProvider implements vscode.WebviewViewProvider {
     webviewView.webview.onDidReceiveMessage((message) => {
       switch (message.command) {
         case "refresh":
-          console.log("refreshing");
-          vscode.window.showInformationMessage(`refreshing`);
+          // vscode.window.showInformationMessage(`refreshing`);
           this._update();
           return;
         case "open-browser":

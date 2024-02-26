@@ -1,14 +1,15 @@
 {
   "name": "vscode-web-dev-server",
   "displayName": "Web Dev Server",
-  "description": "",
-  "version": "0.0.1",
+  "description": "Show live preview of your web app in VS Code using @web/dev-server",
+  "version": "0.1.0",
   "engines": {
     "vscode": "^1.74.0"
   },
   "categories": [
     "Other"
   ],
+  "icon": "icon.png",
   "main": "./out/extension.js",
   "contributes": {
     "views": {
@@ -21,6 +22,10 @@
       ]
     }
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/daKmoR/vscode-web-dev-server"
+  },
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
@@ -28,17 +33,17 @@
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
     "@types/node": "14.x",
-    "test": "node ./out/test/runTest.js"
+    "test": "node ./out/test/runTest.js",
+    "deploy": "vsce publish"
   },
   "devDependencies": {
     "@types/vscode": "^1.61.0",
     "@typescript-eslint/eslint-plugin": "^6.7.0",
     "@typescript-eslint/parser": "^6.7.0",
+    "@vscode/vsce": "^2.24.0",
     "@web/dev-server": "^0.4.0",
     "eslint": "^8.32.0",
-    "typescript": "~5.3.0"
-  },
-  "dependencies": {
+    "typescript": "~5.3.0",
     "@vscode/codicons": "^0.0.35"
   }
 }
