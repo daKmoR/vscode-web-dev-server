@@ -1,40 +1,25 @@
 {
-  "name": "helloworld",
-  "displayName": "helloworld",
+  "name": "vscode-web-dev-server",
+  "displayName": "Web Dev Server",
   "description": "",
   "version": "0.0.1",
   "engines": {
-    "vscode": "^1.61.0"
+    "vscode": "^1.74.0"
   },
   "categories": [
     "Other"
-  ],
-  "activationEvents": [
-    "onView:webDevServer.previewView",
-    "onCommand:helloworld.helloWorld",
-    "onCommand:helloworld.start"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "views": {
       "explorer": [
         {
-					"type": "webview",
-					"id": "webDevServer.previewView",
-					"name": "Web Dev Server"
+          "type": "webview",
+          "id": "webDevServer.previewView",
+          "name": "Web Dev Server"
         }
       ]
-    },
-    "commands": [
-      {
-        "command": "helloworld.helloWorld",
-        "title": "Hello World"
-      },
-      {
-        "command": "helloworld.start",
-        "title": "Web Dev Server: start"
-      }
-    ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
@@ -42,22 +27,18 @@
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
+    "@types/node": "14.x",
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
-    "@types/chokidar": "^2.1.3",
-    "@types/glob": "^7.1.4",
-    "@types/koa": "^2.13.4",
-    "@types/mocha": "^9.0.0",
-    "@types/node": "14.x",
     "@types/vscode": "^1.61.0",
-    "@typescript-eslint/eslint-plugin": "^5.1.0",
-    "@typescript-eslint/parser": "^5.1.0",
-    "@vscode/test-electron": "^1.6.2",
-    "@web/dev-server": "^0.1.26",
-    "eslint": "^8.1.0",
-    "glob": "^7.1.7",
-    "mocha": "^9.1.3",
-    "typescript": "^4.4.4"
+    "@typescript-eslint/eslint-plugin": "^6.7.0",
+    "@typescript-eslint/parser": "^6.7.0",
+    "@web/dev-server": "^0.4.0",
+    "eslint": "^8.32.0",
+    "typescript": "~5.3.0"
+  },
+  "dependencies": {
+    "@vscode/codicons": "^0.0.35"
   }
 }

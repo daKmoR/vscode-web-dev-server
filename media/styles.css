@@ -1,0 +1,43 @@
+iframe {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  top: 38px;
+  border: 0;
+  background-color: white;
+}
+#header {
+  display: flex;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(100vw - 10px);
+  align-items: center;
+}
+input {
+  border-radius: 10px;
+  border: 1px solid #333;
+  padding: 4px 10px;
+  background: #333;
+  color: #ddd;
+  margin: 5px 0;
+  flex-grow: 1;
+}
+button {
+  border: none;
+  outline: 1px solid transparent;
+  outline-offset: 2px !important;
+  color: var(--vscode-icon-foreground);
+  background: none;
+  margin: 0 0.3em;
+  border-radius: 5px;
+  height: 16px;
+  box-sizing: content-box;
+  padding: 5px;
+}
+
+button:hover {
+  cursor: pointer;
+  background: var(--vscode-toolbar-hoverBackground);
+}
